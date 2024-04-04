@@ -50,7 +50,6 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomType;
 import org.openscience.cdk.interfaces.IRing;
 import org.openscience.cdk.interfaces.IRingSet;
-import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
 
@@ -188,7 +187,7 @@ public class MoleculeKU extends AtomContainer implements IAtomContainer {
 		Iterator<String> keySetIteratorSMARTSnEnergies = keySetSMARTSnEnergies.iterator();
 
 		String currentSMARTS = "C";
-		SMARTSQueryTool querytool = new SMARTSQueryTool(currentSMARTS);					// Creates the Query Tool
+		SMARTSQueryTool querytool = new SMARTSQueryTool(currentSMARTS, this.getBuilder());		// Creates the Query Tool
 
 
 		while(keySetIteratorSMARTSnEnergies.hasNext()){
@@ -447,7 +446,7 @@ public class MoleculeKU extends AtomContainer implements IAtomContainer {
 		*/ //end old matching 2.0
 		
 		for (String currentSMARTS : SMARTSstrings){
-			SMARTSQueryTool querytool = new SMARTSQueryTool(currentSMARTS);		// Creates the Query Tool
+			SMARTSQueryTool querytool = new SMARTSQueryTool(currentSMARTS, this.getBuilder());		// Creates the Query Tool
 	
 			querytool.setSmarts(currentSMARTS);
 	
@@ -517,7 +516,7 @@ public class MoleculeKU extends AtomContainer implements IAtomContainer {
 		
 
 		for (String currentSMARTS : SMARTSstrings){
-			SMARTSQueryTool querytool = new SMARTSQueryTool(currentSMARTS);		// Creates the Query Tool
+			SMARTSQueryTool querytool = new SMARTSQueryTool(currentSMARTS, this.getBuilder());		// Creates the Query Tool
 			
 			querytool.setSmarts(currentSMARTS);
 			
@@ -902,7 +901,7 @@ public class MoleculeKU extends AtomContainer implements IAtomContainer {
 		double correction = 100.0; //the penalty (in kJ/mol) which is added to the score of the atoms chosen
 		int numberOfSMARTSmatches = 0;
 		String currentSMARTS = "C";
-		SMARTSQueryTool querytool = new SMARTSQueryTool(currentSMARTS); // Creates the Query Tool
+		SMARTSQueryTool querytool = new SMARTSQueryTool(currentSMARTS, this.getBuilder()); // Creates the Query Tool
 
 		// Iterate over the SMARTS in the array above
 		Iterator<String> itr = EmpiricalSMARTS.iterator();
@@ -958,10 +957,10 @@ public class MoleculeKU extends AtomContainer implements IAtomContainer {
 		//ringset now contains all the rings in the molecule
 		
 		//do atom type matching
-		IAtomTypeMatcher atm = SybylAtomTypeMatcher.getInstance(NoNotificationChemObjectBuilder.getInstance());
+		IAtomTypeMatcher atm = SybylAtomTypeMatcher.getInstance(this.getBuilder());
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream("org/openscience/cdk/dict/data/sybyl-atom-types.owl");
 		@SuppressWarnings("deprecation")
-		AtomTypeFactory factory = AtomTypeFactory.getInstance(ins,"owl",NoNotificationChemObjectBuilder.getInstance());
+		AtomTypeFactory factory = AtomTypeFactory.getInstance(ins,"owl",this.getBuilder());
 		atomTypes = factory.getAllAtomTypes();
 		
 		//map atomtypes to the atomIndex integer array
