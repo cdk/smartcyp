@@ -1,5 +1,6 @@
 /* 
  * Copyright (C) 2010-2013  David Gloriam <davidgloriam@googlemail.com> & Patrik Rydberg <patrik.rydberg@gmail.com>
+ *                    2024  Egon Willighagen <egon.willighagen@gmail.com>
  * 
  * Contact: smartcyp@farma.ku.dk
  * 
@@ -34,7 +35,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
 import org.openscience.cdk.Atom;
-import org.openscience.cdk.MoleculeSet;
+import org.openscience.cdk.interfaces.IAtomContainerSet;
 
 import smartcyp.MoleculeKU.SMARTCYP_PROPERTY;
 
@@ -73,7 +74,7 @@ public class WriteResultsAsCSV {
 
 
 
-	public void writeCSV(MoleculeSet moleculeSet) {
+	public void writeCSV(IAtomContainerSet moleculeSet) {
 		
 		if (OutputFile=="") OutputFile = "SMARTCyp_Results_" + this.dateAndTime;
 
@@ -90,10 +91,10 @@ public class WriteResultsAsCSV {
 
 
 		// Iterate MoleculKUs
-		for (int moleculeIndex=0; moleculeIndex < moleculeSet.getMoleculeCount(); moleculeIndex++) {
+		for (int moleculeIndex=0; moleculeIndex < moleculeSet.getAtomContainerCount(); moleculeIndex++) {
 
 			// Set variables
-			MoleculeKU moleculeKU = (MoleculeKU) moleculeSet.getMolecule(moleculeIndex);
+			MoleculeKU moleculeKU = (MoleculeKU) moleculeSet.getAtomContainer(moleculeIndex);
 			moleculeID = moleculeKU.getID();
 
 			// Iterate Atoms

@@ -1,5 +1,6 @@
 /* 
  * Copyright (C) 2012  Patrik Rydberg <patrik.rydberg@gmail.com>
+ *               2024  Egon Willighagen <egon.willighagen@gmail.com>
  * 
  * Contact: smartcyp@farma.ku.dk
  * 
@@ -35,10 +36,11 @@ import java.text.DecimalFormatSymbols;
 import java.util.Properties;
 
 import org.openscience.cdk.Atom;
+import org.openscience.cdk.AtomContainer;
+import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.CDKConstants;
-import org.openscience.cdk.Molecule;
-import org.openscience.cdk.MoleculeSet;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.io.MDLV2000Writer;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.io.SMILESWriter;
@@ -70,7 +72,7 @@ public class WriteFilterStructures {
 	}
 
 
-	public void write(MoleculeSet moleculeSet) throws CDKException {
+	public void write(IAtomContainerSet moleculeSet) throws CDKException {
 	
 		if (OutputFile=="") OutputFile = "SMARTCyp_Results_Filtervalues_" + this.dateAndTime;
 		else OutputFile = OutputFile + "_structures";
@@ -83,7 +85,7 @@ public class WriteFilterStructures {
 				PropertiesListener listener = new PropertiesListener(customSettings);
 				outfile.addChemObjectIOListener(listener);
 				outfile.customizeJob();
-				outfile.writeMoleculeSet(moleculeSet);
+				outfile.writeAtomContainerSet(moleculeSet);
 				outfile.close();
 			}
 			catch (IOException e) {

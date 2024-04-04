@@ -1,5 +1,6 @@
 /* 
  * Copyright (C) 2013  Patrik Rydberg <patrik.rydberg@gmail.com>
+ *               2024  Egon Willighagen <egon.willighagen@gmail.com>
  * 
  * Contact: smartcyp@farma.ku.dk
  * 
@@ -35,8 +36,9 @@ import java.text.DecimalFormatSymbols;
 import java.util.Properties;
 
 import org.openscience.cdk.Atom;
+import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.CDKConstants;
-import org.openscience.cdk.MoleculeSet;
+import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.io.SMILESWriter;
 import org.openscience.cdk.io.listener.PropertiesListener;
 import org.openscience.cdk.smiles.SmilesGenerator;
@@ -74,7 +76,7 @@ public class WriteFilterValuesAsCSV {
 
 
 
-	public void writeCSV(MoleculeSet moleculeSet) {
+	public void writeCSV(IAtomContainerSet moleculeSet) {
 		
 		if (OutputFile=="") OutputFile = "SMARTCyp_Results_Filtervalues_" + this.dateAndTime;
 		else OutputFile = OutputFile + "_Filtervalues";
@@ -92,10 +94,10 @@ public class WriteFilterValuesAsCSV {
 
 
 		// Iterate MoleculKUs
-		for (int moleculeIndex=0; moleculeIndex < moleculeSet.getMoleculeCount(); moleculeIndex++) {
+		for (int moleculeIndex=0; moleculeIndex < moleculeSet.getAtomContainerCount(); moleculeIndex++) {
 
 			// Set variables
-			MoleculeKU moleculeKU = (MoleculeKU) moleculeSet.getMolecule(moleculeIndex);
+			MoleculeKU moleculeKU = (MoleculeKU) moleculeSet.getAtomContainer(moleculeIndex);
 			moleculeID = moleculeKU.getID();
 			FilterValue = (Double) moleculeKU.getProperty("FilterValue");
 			

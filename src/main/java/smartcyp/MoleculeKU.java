@@ -1,5 +1,6 @@
 /* 
  * Copyright (C) 2010-2011  David Gloriam <davidgloriam@googlemail.com> & Patrik Rydberg <patrik.rydberg@gmail.com>
+ *                    2024  Egon Willighagen <egon.willighagen@gmail.com>
  * 
  * Contact: smartcyp@farma.ku.dk
  * 
@@ -47,14 +48,13 @@ import org.openscience.cdk.graph.matrix.AdjacencyMatrix;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomType;
-import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IRing;
 import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
 
-public class MoleculeKU extends AtomContainer implements IMolecule {
+public class MoleculeKU extends AtomContainer implements IAtomContainer {
 	
 	public enum SMARTCYP_PROPERTY {
 		SymmetryNumber,
