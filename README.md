@@ -14,8 +14,10 @@ mvn clean install
 ## Running the code
 
 ```
-java -jar target/smartcyp.jar
+java -jar target/smartcyp.jar -png -smiles "CC(=O)Nc1ccc(O)cc1"
 ```
+
+This will create an interactive HTML file.
 
 ## How to cite
 
