@@ -1,0 +1,5 @@
+dependency-reduced-pom.xml
+target/
+SMARTCyp_Results_20*.csv
+SMARTCyp_Results_20*.html
+smartcyp_images_20*/
