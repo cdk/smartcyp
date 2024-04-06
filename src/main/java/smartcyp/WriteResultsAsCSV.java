@@ -34,7 +34,7 @@ import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
-import org.openscience.cdk.Atom;
+import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 
 import smartcyp.MoleculeKU.SMARTCYP_PROPERTY;
@@ -86,7 +86,7 @@ public class WriteResultsAsCSV {
 		}
 
 		outfile.println("Molecule,Atom,Ranking,Score,Energy,Relative Span,2D6ranking,2D6score,Span2End,N+Dist,2Cranking,2Cscore,COODist,2DSASA");
-		Atom currentAtom;
+		IAtom currentAtom;
 		String currentAtomType;					// Atom symbol i.e. C, H, N, P or S
 
 
@@ -100,7 +100,7 @@ public class WriteResultsAsCSV {
 			// Iterate Atoms
 			for(int atomIndex = 0; atomIndex < moleculeKU.getAtomCount()  ; atomIndex++ ){
 				
-				currentAtom = (Atom) moleculeKU.getAtom(atomIndex);
+				currentAtom = (IAtom) moleculeKU.getAtom(atomIndex);
 
 				// Match atom symbol
 				currentAtomType = currentAtom.getSymbol();
