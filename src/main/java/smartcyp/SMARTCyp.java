@@ -449,7 +449,7 @@ public class SMARTCyp {
 						adder.addImplicitHydrogens(iAtomContainer);
 						CDKHueckelAromaticityDetector.detectAromaticity(iAtomContainer); 	
 							
-						moleculeKU = new MoleculeKU(iAtomContainer, SMARTSnEnergiesTable);	
+						moleculeKU = new MoleculeKU(iAtomContainer);
 						moleculeSet.addAtomContainer(moleculeKU);
 						moleculeKU.setID(Integer.toString(highestMoleculeID));
 						//set the molecule title in the moleculeKU object

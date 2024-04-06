@@ -31,11 +31,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.atomtype.IAtomTypeMatcher;
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
@@ -47,12 +47,22 @@ import org.openscience.cdk.graph.matrix.AdjacencyMatrix;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomType;
+import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.interfaces.IBond.Order;
+import org.openscience.cdk.interfaces.IBond.Stereo;
+import org.openscience.cdk.interfaces.IChemObjectBuilder;
+import org.openscience.cdk.interfaces.IChemObjectChangeEvent;
+import org.openscience.cdk.interfaces.IChemObjectListener;
+import org.openscience.cdk.interfaces.IElectronContainer;
+import org.openscience.cdk.interfaces.ILonePair;
 import org.openscience.cdk.interfaces.IRing;
 import org.openscience.cdk.interfaces.IRingSet;
+import org.openscience.cdk.interfaces.ISingleElectron;
+import org.openscience.cdk.interfaces.IStereoElement;
 import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
 
-public class MoleculeKU extends AtomContainer implements IAtomContainer {
+public class MoleculeKU implements IAtomContainer {
 	
 	public enum SMARTCYP_PROPERTY {
 		SymmetryNumber,
@@ -158,15 +168,16 @@ public class MoleculeKU extends AtomContainer implements IAtomContainer {
 	private TreeSet<IAtom> atomsSortedByEnA2C9 = new TreeSet<IAtom>(atomComparator2C9);
 	private int HighestSymmetryNumber = 0;
 
+	private IAtomContainer container;
 
 	// Constructor
 	// This constructor also calls the methods that calculate MaxTopDist, Energies and sorts C, N, P and S atoms
 	// This constructor is the only way to create MoleculeKU and Atom objects, -there is no add() method
-	public MoleculeKU(IAtomContainer iAtomContainer, HashMap<String, Double> SMARTSnEnergiesTable) throws CloneNotSupportedException
+	public MoleculeKU(IAtomContainer iAtomContainer) throws CloneNotSupportedException
 	{
 		// Calls the constructor in org.openscience.cdk.AtomContainer
 		// Atoms are stored in the array atoms[] and accessed by getAtom() and setAtom()
-		super(iAtomContainer);			
+		this.container = iAtomContainer;			
 		int number = 1;
 		for (int atomIndex=0; atomIndex < iAtomContainer.getAtomCount(); atomIndex++) {
 			iAtomContainer.getAtom(atomIndex).setID(String.valueOf(number));
@@ -174,7 +185,10 @@ public class MoleculeKU extends AtomContainer implements IAtomContainer {
 		}
 	}
 
-
+    @Override
+    public IAtomContainer clone() throws CloneNotSupportedException {
+    	return new MoleculeKU(this.container.clone());
+    }
 
 	public void assignAtomEnergies(HashMap<String, Double> SMARTSnEnergiesTable) throws CDKException {
 
@@ -645,8 +659,8 @@ public class MoleculeKU extends AtomContainer implements IAtomContainer {
 			atom.setCharge((double) atom.getFormalCharge());
 		}
 		//compute symmetry
-		EquivalentClassPartitioner symmtest = new EquivalentClassPartitioner((AtomContainer) this);
-		int[] symmetryNumbersArray = symmtest.getTopoEquivClassbyHuXu((AtomContainer) this);
+		EquivalentClassPartitioner symmtest = new EquivalentClassPartitioner(this);
+		int[] symmetryNumbersArray = symmtest.getTopoEquivClassbyHuXu(this);
 		symmetryNumbersArray[0]=0;//so we can count the number of symmetric sites for each atom without double counting for the ones with the highest symmetrynumber
 		int symmsites;
 		for(int atomIndex = 0; atomIndex < this.getAtomCount(); atomIndex++){
@@ -1079,19 +1093,19 @@ public class MoleculeKU extends AtomContainer implements IAtomContainer {
 	        //now compute the SASA
 			if (degree == 1){
 				SASA[i] = 69.398 + 5.78853*result[i][0] + 8.14842*result[i][1] + 10.902*result[i][3] - 3.79476*(result[i][4] + result[i][12]) - 4.72395*result[i][5] - 0.428496*result[i][6] - 7.86361*result[i][7] - 6.98044*result[i][8] - 0.360787*result[i][14] - 2.77637*result[i][23] + 19.2001*result[i][29] + 21.6887*result[i][30] - 6.90254*result[i][38] + 10.9989*result[i][40] + 21.3963*result[i][41] + 36.6827*result[i][44] + 2.05628*result[i][49] + 1.50124*result[i][61] - 2.75678*result[i][62] + 0.584144*result[i][63] + 0.513805*result[i][64] + 0.687804*(result[i][65] + result[i][73]) - 0.684153*result[i][66] + 3.60709*result[i][67] + 5.16584*result[i][68] + 0.978418*result[i][70] - 3.30868*result[i][72] - 0.474438*result[i][74] + 0.855398*result[i][75] - 0.00514406*result[i][90] - 1.34609*result[i][92] + 0.434973*result[i][93] - 1.66701*result[i][110] + 0.449726*result[i][114] + 2.79506*result[i][115] + 3.16091*result[i][116] + 3.14218*result[i][117] + 3.26049*result[i][118] + 5.21884*result[i][119] + 3.63829*result[i][120] - 0.132674*result[i][121] - 1.09042*result[i][122] - 0.148641*result[i][123] - 0.399671*result[i][124] - 0.622042*result[i][125] + 0.967894*(result[i][126] + result[i][134]) + 0.944741*result[i][127] - 0.0686273*result[i][129] + 1.65721*result[i][130] - 1.18028*result[i][131] + 0.976225*result[i][133] - 0.699007*result[i][135] - 2.00286*result[i][136] - 2.77637*result[i][145] - 1.37897*result[i][151] - 3.84404*result[i][152] - 1.85712*result[i][153] - 1.99257*result[i][154] - 1.10528*result[i][160] - 0.556981*result[i][162] - 3.44505*result[i][163] - 6.73047*result[i][166] + 3.49429*result[i][171] + 0.241962*result[i][175] + 0.444548*result[i][176] + 1.27982*result[i][177] + 1.16457*result[i][178] + 1.2906*result[i][179] + 1.98826*result[i][180] + 1.65196*result[i][181] - 0.00425184*result[i][182] - 1.08794*result[i][183] - 0.445351*result[i][184] - 1.05244*result[i][185] + 0.60601*result[i][186] - 0.550949*(result[i][187] + result[i][195]) + 0.0117083*result[i][188] + 0.5737*result[i][189] - 0.583502*result[i][190] - 0.171522*result[i][191] + 1.91683*result[i][192] - 0.837166*result[i][194] - 1.0275*result[i][196] - 1.30878*result[i][197] - 2.11989*result[i][206] - 2.307*result[i][212] - 2.17505*result[i][213] - 0.897734*result[i][214] - 3.05934*result[i][215] - 0.283271*result[i][221] - 1.56529*result[i][223] - 4.20396*result[i][224] - 14.1115*result[i][227] + 0.712954*result[i][232] + 1.0782*result[i][236] - 3.47834*result[i][305] - 2.52864*result[i][306] - 2.0899*result[i][307];
-				//SASA  = 69.398 + 5.78853*0-0.C.3      + 8.14842*0-1.C.2      + 10.902*0-3.C.1      – 3.79476*(0-4.N.3 + 0-12.N.4)           - 4.72395*0-5.N.2      - 0.428496*0-6.N.1      - 7.86361*0-7.O.3      - 6.98044*0-8.O.2      - 0.360787*0-14.N.am     - 2.77637*0-23.O.co2    + 19.2001*0-29.S.3      + 21.6887*0-30.S.2      - 6.90254*0-38.F        + 10.9989*0-40.Cl       + 21.3963*0-41.Br       + 36.6827*0-44.I        + 2.05628*0-49.Any      + 1.50124*1-0.C.3       - 2.75678*1-1.C.2       + 0.584144*1-2.C.ar      + 0.513805*1-3.C.1       + 0.687804*(1-4.N.3 + 1-12.N4)             - 0.684153*1-5.N.2       + 3.60709*1-6.N.1       + 5.16584*1-7.O.3       + 0.978418*1-9.P.3       - 3.30868*1-11.N.pl3    - 0.474438*1-13.N.ar     + 0.855398*1-14.N.am     - 0.00514406*1-29.S.3      - 1.34609*1-31.S.O      + 0.434973*1-32.S.O2     - 1.66701*1-49.Any       + 0.449726*1-53.X         + 2.79506*1-3ring        + 3.16091*1-4ring        + 3.14218*1-5ring        + 3.26049*1-6ring        + 5.21884*1-7ring        + 3.63829*1-8ring        - 0.132674*1-Largering    - 1.09042*2-0.C.3        - 0.148641*2-1.C.2        - 0.399671*2-2.C.ar       - 0.622042*2-3.C.1        + 0.967894*(2-4.N.3 + 2-12.N.4)              + 0.944741*2-5.N.2        - 0.0686273*2-7.O.3        + 1.65721*2-8.O.2        - 1.18028*2-9.P.3        + 0.976225*2-11.N.pl3     - 0.699007*2-13.N.ar      – 2.00286*2-14.N.am      - 2.77637*2-23.O.co2     - 1.37897*2-29.S.3       - 3.84404*2-30.S.2       - 1.85712*2-31.S.O       - 1.99257*2-32.S.O2      - 1.10528*2-38.F         - 0.556981*2-40.Cl        - 3.44505*2-41.Br        - 6.73047*2-44.I         + 3.49429*2-49.Any       + 0.241962*2-53.X         + 0.444548*2-3ring        + 1.27982*2-4ring        + 1.16457*2-5ring        + 1.2906*2-6ring        + 1.98826*2-7ring        + 1.65196*2-8ring        - 0.00425184*2-Largering    - 1.08794*3-0.C.3        - 0.445351*3-1.C.2        - 1.05244*3-2.C.ar       + 0.60601*3-3.C.1        - 0.550949*(3-4.N.3 + 3-12.N.4)              + 0.0117083*3-5.N.2        + 0.5737*3-6.N.1        - 0.583502*3-7.O.3        - 0.171522*3-8.O.2        + 1.91683*3-9.P.3        - 0.837166*3-11.N.pl3     - 1.0275*3-13.N.ar      - 1.30878*3-14.N.am      - 2.11989*3-23.O.co2     - 2.307*3-29.S.3       - 2.17505*3-30.S.2       - 0.897734*3-31.S.O       - 3.05934*3-32.S.O2      - 0.283271*3-38.F         - 1.56529*3-40.Cl        - 4.20396*3-41.Br        - 14.1115*3-44.I         + 0.712954*3-49.Any       + 1.0782*3-53.X         - 3.47834*2-neighbours   - 2.52864*3-neighbours   - 2.0899*4-neighbours
+				//SASA  = 69.398 + 5.78853*0-0.C.3      + 8.14842*0-1.C.2      + 10.902*0-3.C.1      ï¿½ 3.79476*(0-4.N.3 + 0-12.N.4)           - 4.72395*0-5.N.2      - 0.428496*0-6.N.1      - 7.86361*0-7.O.3      - 6.98044*0-8.O.2      - 0.360787*0-14.N.am     - 2.77637*0-23.O.co2    + 19.2001*0-29.S.3      + 21.6887*0-30.S.2      - 6.90254*0-38.F        + 10.9989*0-40.Cl       + 21.3963*0-41.Br       + 36.6827*0-44.I        + 2.05628*0-49.Any      + 1.50124*1-0.C.3       - 2.75678*1-1.C.2       + 0.584144*1-2.C.ar      + 0.513805*1-3.C.1       + 0.687804*(1-4.N.3 + 1-12.N4)             - 0.684153*1-5.N.2       + 3.60709*1-6.N.1       + 5.16584*1-7.O.3       + 0.978418*1-9.P.3       - 3.30868*1-11.N.pl3    - 0.474438*1-13.N.ar     + 0.855398*1-14.N.am     - 0.00514406*1-29.S.3      - 1.34609*1-31.S.O      + 0.434973*1-32.S.O2     - 1.66701*1-49.Any       + 0.449726*1-53.X         + 2.79506*1-3ring        + 3.16091*1-4ring        + 3.14218*1-5ring        + 3.26049*1-6ring        + 5.21884*1-7ring        + 3.63829*1-8ring        - 0.132674*1-Largering    - 1.09042*2-0.C.3        - 0.148641*2-1.C.2        - 0.399671*2-2.C.ar       - 0.622042*2-3.C.1        + 0.967894*(2-4.N.3 + 2-12.N.4)              + 0.944741*2-5.N.2        - 0.0686273*2-7.O.3        + 1.65721*2-8.O.2        - 1.18028*2-9.P.3        + 0.976225*2-11.N.pl3     - 0.699007*2-13.N.ar      ï¿½ 2.00286*2-14.N.am      - 2.77637*2-23.O.co2     - 1.37897*2-29.S.3       - 3.84404*2-30.S.2       - 1.85712*2-31.S.O       - 1.99257*2-32.S.O2      - 1.10528*2-38.F         - 0.556981*2-40.Cl        - 3.44505*2-41.Br        - 6.73047*2-44.I         + 3.49429*2-49.Any       + 0.241962*2-53.X         + 0.444548*2-3ring        + 1.27982*2-4ring        + 1.16457*2-5ring        + 1.2906*2-6ring        + 1.98826*2-7ring        + 1.65196*2-8ring        - 0.00425184*2-Largering    - 1.08794*3-0.C.3        - 0.445351*3-1.C.2        - 1.05244*3-2.C.ar       + 0.60601*3-3.C.1        - 0.550949*(3-4.N.3 + 3-12.N.4)              + 0.0117083*3-5.N.2        + 0.5737*3-6.N.1        - 0.583502*3-7.O.3        - 0.171522*3-8.O.2        + 1.91683*3-9.P.3        - 0.837166*3-11.N.pl3     - 1.0275*3-13.N.ar      - 1.30878*3-14.N.am      - 2.11989*3-23.O.co2     - 2.307*3-29.S.3       - 2.17505*3-30.S.2       - 0.897734*3-31.S.O       - 3.05934*3-32.S.O2      - 0.283271*3-38.F         - 1.56529*3-40.Cl        - 4.20396*3-41.Br        - 14.1115*3-44.I         + 0.712954*3-49.Any       + 1.0782*3-53.X         - 3.47834*2-neighbours   - 2.52864*3-neighbours   - 2.0899*4-neighbours
 			}
 			else if (degree == 2){
 				SASA[i] = 36.313 + 4.6392*result[i][0] + 1.2816*result[i][1] + 0.381523*result[i][2] - 4.8009*result[i][3] - 5.74616*(result[i][4] + result[i][12]) - 5.72546*result[i][5] - 17.4968*result[i][6] - 8.6582*result[i][7] + 13.4589*result[i][9] - 9.44538*result[i][11] - 8.00637*result[i][13] - 5.87287*result[i][14] + 16.345*result[i][29] - 5.84368*result[i][49] + 15.703*result[i][53] + 10.8456*result[i][54] + 7.11435*result[i][55] + 5.62924*result[i][56] + 3.66452*result[i][57] + 3.03218*result[i][58] + 2.37037*result[i][59] + 1.15921*result[i][60] - 0.25986*result[i][61] - 0.0538884*result[i][62] - 0.198095*result[i][63] - 2.39771*result[i][64] + 0.915652*(result[i][65] + result[i][73]) + 2.05874*result[i][66] - 2.3966*result[i][67] + 1.748*result[i][68] + 3.6437*result[i][69] + 5.48383*result[i][70] + 0.760189*result[i][72] + 2.25371*result[i][74] + 1.76986*result[i][75] - 1.99391*result[i][90] - 3.66614*result[i][91] + 0.921871*result[i][92] + 2.12494*result[i][93] + 6.22166*result[i][99] - 2.16946*result[i][101] - 1.92131*result[i][102] - 5.20707*result[i][105] + 0.960373*result[i][110] - 1.39626*result[i][114] + 3.41092*result[i][115] + 2.27951*result[i][116] + 2.33036*result[i][117] + 2.30013*result[i][118] + 1.91994*result[i][119] + 1.63312*result[i][120] + 0.51774*result[i][121] - 1.33287*result[i][122] - 1.0075*result[i][123] - 0.00417948*result[i][124] + 0.425798*result[i][125] - 1.61451*(result[i][126] + result[i][134]) - 0.218171*result[i][127] + 3.47493*result[i][128] - 0.192681*result[i][129] + 0.109217*result[i][130] - 1.89443*result[i][131] - 0.162071*result[i][133] + 0.498812*result[i][135] - 0.967793*result[i][136] - 0.106596*result[i][145] - 2.1237*result[i][151] - 1.77206*result[i][152] - 1.84888*result[i][153] - 4.05364*result[i][154] + 0.386633*result[i][160] - 2.49029*result[i][162] - 3.23834*result[i][163] - 4.19951*result[i][166] - 0.329984*result[i][171] - 1.24065*result[i][175] - 2.7876*result[i][305] - 1.91567*result[i][306] - 0.824754*result[i][307];
-				//SASA  = 36.313 + 4.6392*0-0.C.3      + 1.2816*0-1.C.2      + 0.381523*0-2.C.ar     - 4.8009*0-3.C.1      – 5.74616*(0-4.N.3 + 0-12.N.4)           - 5.72546*0-5.N.2      - 17.4968*0-6.N.1      - 8.6582*0-7.O.3      + 13.4589*0-9.P.3      - 9.44538*0-11.N.pl3    - 8.00637*0-13.N.ar     - 5.87287*0-14.N.am     + 16.345*0-29.S.3      - 5.84368*0-49.Any      + 15.703*0-53.X        + 10.8456*0-3ring       + 7.11435*0-4ring       + 5.62924*0-5ring       + 3.66452*0-6ring       + 3.03218*0-7ring       + 2.37037*0-8ring       + 1.15921*0-Largering   - 0.25986*1-0.C.3       - 0.0538884*1-1.C.2       - 0.198095*1-2.C.ar      - 2.39771*1-3.C.1       + 0.915652*(1-4.N.3 + 1-12.N.4)            + 2.05874*1-5.N.2       - 2.3966*1-6.N.1       + 1.748*1-7.O.3       + 3.6437*1-8.O.2       + 5.48383*1-9.P.3       + 0.760189*1-11.N.pl3    + 2.25371*1-13.N.ar     + 1.76986*1-14.N.am     - 1.99391*1-29.S.3      - 3.66614*1-30.S.2        + 0.921871*1-31.S.O      + 2.12494*1-32.S.O2     + 6.22166*1-38.F        - 2.16946*1-40.Cl        - 1.92131*1-41.Br        - 5.20707*1-44.I         + 0.960373*1-49.Any       - 1.39626*1-53.X         + 3.41092*1-3ring        + 2.27951*1-4ring        + 2.33036*1-5ring        + 2.30013*1-6ring        + 1.91994*1-7ring        + 1.63312*1-8ring        + 0.51774*1-Largering    - 1.33287*2-0.C.3        - 1.0075*2-1.C.2        - 0.00417948*2-2.C.ar       + 0.425798*2-3.C.1        - 1.61451*(2-4.N.3 + 2-12.N.4)              - 0.218171*2-5.N.2        + 3.47493*2-6.N.1        - 0.192681*2-7.O.3        + 0.109217*2-8.O.2        - 1.89443*2-9.P.3        - 0.162071*2-11.N.pl3     + 0.498812*2-13.N.ar      - 0.967793*2-14.N.am      - 0.106596*2-23.O.co2     - 2.1237*2-29.S.3       - 1.77206*2-30.S.2       - 1.84888*2-31.S.O       - 4.05364*2-32.S.O2      + 0.386633*2-38.F         - 2.49029*2-40.Cl        - 3.23834*2-41.Br        - 4.19951*2-44.I         - 0.329984*2-49.Any       - 1.24065*2-53.X         - 2.7876*2-neighbours   - 1.91567*3-neighbours   - 0.824754*4-neighbours
+				//SASA  = 36.313 + 4.6392*0-0.C.3      + 1.2816*0-1.C.2      + 0.381523*0-2.C.ar     - 4.8009*0-3.C.1      ï¿½ 5.74616*(0-4.N.3 + 0-12.N.4)           - 5.72546*0-5.N.2      - 17.4968*0-6.N.1      - 8.6582*0-7.O.3      + 13.4589*0-9.P.3      - 9.44538*0-11.N.pl3    - 8.00637*0-13.N.ar     - 5.87287*0-14.N.am     + 16.345*0-29.S.3      - 5.84368*0-49.Any      + 15.703*0-53.X        + 10.8456*0-3ring       + 7.11435*0-4ring       + 5.62924*0-5ring       + 3.66452*0-6ring       + 3.03218*0-7ring       + 2.37037*0-8ring       + 1.15921*0-Largering   - 0.25986*1-0.C.3       - 0.0538884*1-1.C.2       - 0.198095*1-2.C.ar      - 2.39771*1-3.C.1       + 0.915652*(1-4.N.3 + 1-12.N.4)            + 2.05874*1-5.N.2       - 2.3966*1-6.N.1       + 1.748*1-7.O.3       + 3.6437*1-8.O.2       + 5.48383*1-9.P.3       + 0.760189*1-11.N.pl3    + 2.25371*1-13.N.ar     + 1.76986*1-14.N.am     - 1.99391*1-29.S.3      - 3.66614*1-30.S.2        + 0.921871*1-31.S.O      + 2.12494*1-32.S.O2     + 6.22166*1-38.F        - 2.16946*1-40.Cl        - 1.92131*1-41.Br        - 5.20707*1-44.I         + 0.960373*1-49.Any       - 1.39626*1-53.X         + 3.41092*1-3ring        + 2.27951*1-4ring        + 2.33036*1-5ring        + 2.30013*1-6ring        + 1.91994*1-7ring        + 1.63312*1-8ring        + 0.51774*1-Largering    - 1.33287*2-0.C.3        - 1.0075*2-1.C.2        - 0.00417948*2-2.C.ar       + 0.425798*2-3.C.1        - 1.61451*(2-4.N.3 + 2-12.N.4)              - 0.218171*2-5.N.2        + 3.47493*2-6.N.1        - 0.192681*2-7.O.3        + 0.109217*2-8.O.2        - 1.89443*2-9.P.3        - 0.162071*2-11.N.pl3     + 0.498812*2-13.N.ar      - 0.967793*2-14.N.am      - 0.106596*2-23.O.co2     - 2.1237*2-29.S.3       - 1.77206*2-30.S.2       - 1.84888*2-31.S.O       - 4.05364*2-32.S.O2      + 0.386633*2-38.F         - 2.49029*2-40.Cl        - 3.23834*2-41.Br        - 4.19951*2-44.I         - 0.329984*2-49.Any       - 1.24065*2-53.X         - 2.7876*2-neighbours   - 1.91567*3-neighbours   - 0.824754*4-neighbours
 			}
 			else if (degree == 3){
 				SASA[i] = 8.10362 + 4.2306*result[i][0] - 0.195801*result[i][1] - 1.20172*result[i][2] - 0.63488*(result[i][4] + result[i][12]) - 4.29911*result[i][5] + 13.9863*result[i][9] - 3.72158*result[i][11] - 4.22975*result[i][13] - 2.83839*result[i][14] + 15.3793*result[i][31] - 0.778124*result[i][49] + 15.4021*result[i][53] + 7.06802*result[i][54] + 3.59719*result[i][55] + 2.39734*result[i][56] + 2.14661*result[i][57] + 0.786478*result[i][58] - 0.620753*result[i][59] - 0.976815*result[i][60] - 0.451406*result[i][61] + 0.07849*result[i][62] - 0.422978*result[i][63] + 0.337648*result[i][64] + 0.72273*(result[i][65] + result[i][73]) + 0.820382*result[i][66] + 0.00630794*result[i][67] + 1.08627*result[i][68] + 1.12133*result[i][69] - 0.530167*result[i][70] + 0.425938*result[i][72] + 0.760863*result[i][74] + 0.731573*result[i][75] + 1.29837*result[i][84] - 0.775103*result[i][90] - 1.60884*result[i][91] - 0.452205*result[i][92] - 0.831961*result[i][93] + 2.05704*result[i][99] - 0.210129*result[i][101] - 0.541039*result[i][102] - 1.25276*result[i][105] + 0.274326*result[i][110] + 0.327228*result[i][114] - 0.435025*result[i][122] - 0.370122*result[i][123] + 0.0170519*result[i][124] + 0.146891*result[i][125] - 0.228529*(result[i][126] + result[i][134]) - 0.0871553*result[i][127] + 0.333549*result[i][128] - 0.373297*result[i][129] + 0.289118*result[i][130] - 1.03946*result[i][131] - 0.0323635*result[i][133] + 0.315932*result[i][135] - 0.604901*result[i][136] - 0.230707*result[i][145] - 0.467778*result[i][151] + 0.648047*result[i][152] - 1.14572*result[i][153] - 1.52299*result[i][154] - 0.239062*result[i][160] - 0.642037*result[i][162] - 0.121696*result[i][163] - 0.436216*result[i][166] + 0.106403*result[i][171] + 1.14091*result[i][175] - 0.594363*result[i][305] - 0.321139*result[i][306] - 0.305511*result[i][307];
-				//SASA  = 8.10362 + 4.2306*0-0.C.3      - 0.195801*0-1.C.2      - 1.20172*0-2.C.ar     – 0.63488*(0-4.N.3 + 0-12.N.4)           - 4.29911*0-5.N.2      + 13.9863*0-9.P.3      - 3.72158*0-11.N.pl3    - 4.22975*0-13.N.ar     - 2.83839*0-14.N.am     + 15.3793*0-31.S.O      - 0.778124*0-49.Any      + 15.4021*0-53.X        + 7.06802*0-3ring       + 3.59719*0-4ring       + 2.39734*0-5ring       + 2.14661*0-6ring       + 0.786478*0-7ring       - 0.620753*0-8ring       - 0.976815*0-Largering   - 0.451406*1-0.C.3       + 0.07849*1-1.C.2       - 0.422978*1-2.C.ar      + 0.337648*1-3.C.1       + 0.72273*(1-4.N.3 + 1-12.N.4)            + 0.820382*1-5.N.2       + 0.00630794*1-6.N.1       + 1.08627*1-7.O.3       + 1.12133*1-8.O.2       - 0.530167*1-9.P.3       + 0.425938*1-11.N.pl3    + 0.760863*1-13.N.ar     + 0.731573*1-14.N.am     + 1.29837*1-23.O.co2    - 0.775103*1-29.S.3      - 1.60884*1-30.S.2      - 0.452205*1-31.S.O      - 0.831961*1-32.S.O2     + 2.05704*1-38.F        - 0.210129*1-40.Cl        - 0.541039*1-41.Br        - 1.25276*1-44.I         + 0.274326*1-49.Any       + 0.327228*1-53.X         - 0.435025*2-0.C.3        - 0.370122*2-1.C.2        + 0.0170519*2-2.C.ar       + 0.146891*2-3.C.1        - 0.228529*(2-4.N.3 + N-12.N.4)              - 0.0871553*2-5.N.2        + 0.333549*2-6.N.1        - 0.373297*2-7.O.3        + 0.289118*2-8.O.2        - 1.03946*2-9.P.3        - 0.0323635*2-11.N.pl3     + 0.315932*2-13.N.ar      - 0.604901*2-14.N.am      - 0.230707*2-23.O.co2     - 0.467778*2-29.S.3       + 0.648047*2-30.S.2       - 1.14572*2-31.S.O       - 1.52299*2-32.S.O2      - 0.239062*2-38.F         - 0.642037*2-40.Cl        - 0.121696*2-41.Br        - 0.436216*2-44.I         + 0.106403*2-49.Any       + 1.14091*2-53.X         - 0.594363*2-neighbours   - 0.321139*3-neighbours   - 0.305511*4-neighbours
+				//SASA  = 8.10362 + 4.2306*0-0.C.3      - 0.195801*0-1.C.2      - 1.20172*0-2.C.ar     ï¿½ 0.63488*(0-4.N.3 + 0-12.N.4)           - 4.29911*0-5.N.2      + 13.9863*0-9.P.3      - 3.72158*0-11.N.pl3    - 4.22975*0-13.N.ar     - 2.83839*0-14.N.am     + 15.3793*0-31.S.O      - 0.778124*0-49.Any      + 15.4021*0-53.X        + 7.06802*0-3ring       + 3.59719*0-4ring       + 2.39734*0-5ring       + 2.14661*0-6ring       + 0.786478*0-7ring       - 0.620753*0-8ring       - 0.976815*0-Largering   - 0.451406*1-0.C.3       + 0.07849*1-1.C.2       - 0.422978*1-2.C.ar      + 0.337648*1-3.C.1       + 0.72273*(1-4.N.3 + 1-12.N.4)            + 0.820382*1-5.N.2       + 0.00630794*1-6.N.1       + 1.08627*1-7.O.3       + 1.12133*1-8.O.2       - 0.530167*1-9.P.3       + 0.425938*1-11.N.pl3    + 0.760863*1-13.N.ar     + 0.731573*1-14.N.am     + 1.29837*1-23.O.co2    - 0.775103*1-29.S.3      - 1.60884*1-30.S.2      - 0.452205*1-31.S.O      - 0.831961*1-32.S.O2     + 2.05704*1-38.F        - 0.210129*1-40.Cl        - 0.541039*1-41.Br        - 1.25276*1-44.I         + 0.274326*1-49.Any       + 0.327228*1-53.X         - 0.435025*2-0.C.3        - 0.370122*2-1.C.2        + 0.0170519*2-2.C.ar       + 0.146891*2-3.C.1        - 0.228529*(2-4.N.3 + N-12.N.4)              - 0.0871553*2-5.N.2        + 0.333549*2-6.N.1        - 0.373297*2-7.O.3        + 0.289118*2-8.O.2        - 1.03946*2-9.P.3        - 0.0323635*2-11.N.pl3     + 0.315932*2-13.N.ar      - 0.604901*2-14.N.am      - 0.230707*2-23.O.co2     - 0.467778*2-29.S.3       + 0.648047*2-30.S.2       - 1.14572*2-31.S.O       - 1.52299*2-32.S.O2      - 0.239062*2-38.F         - 0.642037*2-40.Cl        - 0.121696*2-41.Br        - 0.436216*2-44.I         + 0.106403*2-49.Any       + 1.14091*2-53.X         - 0.594363*2-neighbours   - 0.321139*3-neighbours   - 0.305511*4-neighbours
 			}
 			else if (degree == 4){
 				SASA[i] = 0.736923 - 0.336528*result[i][0] + 0.301084*result[i][9] - 0.459869*(result[i][4] + result[i][12]) + 0.345742*result[i][32] - 0.418892*result[i][53] + 0.41299*result[i][54] + 0.35276*result[i][55] + 0.254555*result[i][56] + 0.058761*result[i][57] + 0.301721*result[i][58] - 0.00457247*result[i][59] - 0.017045*result[i][60] - 0.0487005*result[i][61] - 0.039913*result[i][62] - 0.00786418*result[i][63] - 0.0342756*result[i][64] - 0.0591981*(result[i][65] + result[i][73]) - 0.0854523*result[i][66] + 0.0267218*result[i][68] + 0.191598*result[i][69] + 0.247932*result[i][70] - 0.0951786*result[i][72] - 0.0706718*result[i][74] - 0.092765*result[i][75] - 0.136653*result[i][90] - 0.48108*result[i][91] - 0.0373439*result[i][93] - 0.0245937*result[i][99] - 0.0793985*result[i][101] - 0.0572088*result[i][102] + 0.6073*result[i][110] + 0.0558154*result[i][114] - 0.0378271*result[i][305] - 0.0572892*result[i][306];
-				//SASA  = 0.736923 - 0.336528*0-0.C.3      + 0.301084*0-9.P.3      - 0.459869*(0-4.N.3 + 0-12.N.4)           + 0.345742*0-32.S.O2     - 0.418892*0-53.X        + 0.41299*0-3ring       + 0.35276*0-4ring       + 0.254555*0-5ring       + 0.058761*0-6ring       + 0.301721*0-7ring       - 0.00457247*0-8ring       - 0.017045*0-Largering   - 0.0487005*1-0.C.3       - 0.039913*1-1.C.2       - 0.00786418*1-2.C.ar      - 0.0342756*1-3.C.1       - 0.0591981*(1-4.N.3 + 1-12.N.4)            – 0.0854523*1-5.N.2       + 0.0267218*1-7.O.3       + 0.191598*1-8.O.2       + 0.247932*1-9.P.3       - 0.0951786*1-11.N.pl3    - 0.0706718*1-13.N.ar     - 0.092765*1-14.N.am     - 0.136653*1-29.S.3        - 0.48108*1-30.S.2      - 0.0373439*1-32.S.O2     - 0.0245937*1-38.F        - 0.0793985*1-40.Cl        - 0.0572088*1-41.Br        + 0.6073*1-49.Any       + 0.0558154*1-53.X         - 0.0378271*2-neighbours   - 0.0572892*3-neighbours
+				//SASA  = 0.736923 - 0.336528*0-0.C.3      + 0.301084*0-9.P.3      - 0.459869*(0-4.N.3 + 0-12.N.4)           + 0.345742*0-32.S.O2     - 0.418892*0-53.X        + 0.41299*0-3ring       + 0.35276*0-4ring       + 0.254555*0-5ring       + 0.058761*0-6ring       + 0.301721*0-7ring       - 0.00457247*0-8ring       - 0.017045*0-Largering   - 0.0487005*1-0.C.3       - 0.039913*1-1.C.2       - 0.00786418*1-2.C.ar      - 0.0342756*1-3.C.1       - 0.0591981*(1-4.N.3 + 1-12.N.4)            ï¿½ 0.0854523*1-5.N.2       + 0.0267218*1-7.O.3       + 0.191598*1-8.O.2       + 0.247932*1-9.P.3       - 0.0951786*1-11.N.pl3    - 0.0706718*1-13.N.ar     - 0.092765*1-14.N.am     - 0.136653*1-29.S.3        - 0.48108*1-30.S.2      - 0.0373439*1-32.S.O2     - 0.0245937*1-38.F        - 0.0793985*1-40.Cl        - 0.0572088*1-41.Br        + 0.6073*1-49.Any       + 0.0558154*1-53.X         - 0.0378271*2-neighbours   - 0.0572892*3-neighbours
 			}
 			//negative SASA is not allowed
 			if (SASA[i] < 0) SASA[i] = 0;
@@ -1171,7 +1185,7 @@ public class MoleculeKU extends AtomContainer implements IAtomContainer {
 	}
 	
 	public void setID(String id){
-		super.setID(id);
+		this.container.setID(id);
 	}
 
 	public String toString(){
@@ -1226,9 +1240,527 @@ public class MoleculeKU extends AtomContainer implements IAtomContainer {
 		}
 		this.setProperty("FilterValue", smallestscore);
 	}
+
+	// wrap around the inner class
+	
+	@Override
+	public void addListener(IChemObjectListener col) {
+		this.container.addListener(col);
+	}
+
+	@Override
+	public int getListenerCount() {
+		return this.container.getListenerCount();
+	}
+
+	@Override
+	public void removeListener(IChemObjectListener col) {
+		this.container.removeListener(col);
+	}
+
+	@Override
+	public void setNotification(boolean bool) {
+		this.container.setNotification(bool);
+	}
+
+	@Override
+	public boolean getNotification() {
+		return this.container.getNotification();
+	}
+
+	@Override
+	public void notifyChanged() {
+		this.container.notifyChanged();
+	}
+
+	@Override
+	public void notifyChanged(IChemObjectChangeEvent evt) {
+		this.container.notifyChanged(evt);
+	}
+
+	@Override
+	public void setProperty(Object description, Object property) {
+		this.container.setProperty(description, property);
+	}
+
+	@Override
+	public void removeProperty(Object description) {
+		this.container.removeProperty(description);
+	}
+
+	@Override
+	public <T> T getProperty(Object description) {
+		return this.container.getProperty(description);
+	}
+
+	@Override
+	public <T> T getProperty(Object description, Class<T> c) {
+		return this.container.getProperty(description, c);
+	}
+
+	@Override
+	public Map<Object, Object> getProperties() {
+		return this.container.getProperties();
+	}
+
+	@Override
+	public String getID() {
+		return this.container.getID();
+	}
+
+	@Override
+	public void setFlag(int mask, boolean value) {
+		this.container.setFlag(mask, value);
+	}
+
+	@Override
+	public boolean getFlag(int mask) {
+		return this.container.getFlag(mask);
+	}
+
+	@Override
+	public void setProperties(Map<Object, Object> properties) {
+		this.container.setProperties(properties);
+	}
+
+	@Override
+	public void addProperties(Map<Object, Object> properties) {
+		this.container.addProperties(properties);
+	}
+
+	@Override
+	public void setFlags(boolean[] newFlags) {
+		this.container.setFlags(newFlags);
+	}
+
+	@Override
+	public boolean[] getFlags() {
+		return this.container.getFlags();
+	}
+
+	@Override
+	public Number getFlagValue() {
+		return this.container.getFlagValue();
+	}
+
+	@Override
+	public IChemObjectBuilder getBuilder() {
+		return this.container.getBuilder();
+	}
+
+	@Override
+	public void stateChanged(IChemObjectChangeEvent event) {
+		this.container.stateChanged(event);
+	}
+
+	@Override
+	public void addStereoElement(IStereoElement element) {
+		this.container.addStereoElement(element);
+	}
+
+	@Override
+	public void setStereoElements(List<IStereoElement> elements) {
+		this.container.setStereoElements(elements);
+	}
+
+	@Override
+	public Iterable<IStereoElement> stereoElements() {
+		return this.container.stereoElements();
+	}
+
+	@Override
+	public void setAtoms(IAtom[] atoms) {
+		this.container.setAtoms(atoms);
+	}
+
+	@Override
+	public void setBonds(IBond[] bonds) {
+		this.container.setBonds(bonds);
+	}
+
+	@Override
+	public void setAtom(int idx, IAtom atom) {
+		this.container.setAtom(idx, atom);
+	}
+
+	@Override
+	public IAtom getAtom(int idx) {
+		return this.container.getAtom(idx);
+	}
+
+	@Override
+	public IBond getBond(int idx) {
+		return this.container.getBond(idx);
+	}
+
+	@Override
+	public ILonePair getLonePair(int idx) {
+		return this.container.getLonePair(idx);
+	}
+
+	@Override
+	public ISingleElectron getSingleElectron(int idx) {
+		return this.container.getSingleElectron(idx);
+	}
+
+	@Override
+	public Iterable<IAtom> atoms() {
+		return this.container.atoms();
+	}
+
+	@Override
+	public Iterable<IBond> bonds() {
+		return this.container.bonds();
+	}
+
+	@Override
+	public Iterable<ILonePair> lonePairs() {
+		return this.container.lonePairs();
+	}
+
+	@Override
+	public Iterable<ISingleElectron> singleElectrons() {
+		return this.container.singleElectrons();
+	}
+
+	@Override
+	public Iterable<IElectronContainer> electronContainers() {
+		return this.container.electronContainers();
+	}
+
+	@Override
+	public IAtom getFirstAtom() {
+		return this.container.getFirstAtom();
+	}
+
+	@Override
+	public IAtom getLastAtom() {
+		return this.container.getLastAtom();
+	}
+
+	@Override
+	public int getAtomNumber(IAtom atom) {
+		return this.container.getAtomNumber(atom);
+	}
+
+	@Override
+	public int getBondNumber(IAtom atom1, IAtom atom2) {
+		return this.container.getBondNumber(atom1, atom2);
+	}
+
+	@Override
+	public int getBondNumber(IBond bond) {
+		return this.container.getBondNumber(bond);
+	}
+
+	@Override
+	public int getLonePairNumber(ILonePair lonePair) {
+		return this.container.getLonePairNumber(lonePair);
+	}
+
+	@Override
+	public int getSingleElectronNumber(ISingleElectron singleElectron) {
+		return this.container.getSingleElectronNumber(singleElectron);
+	}
+
+	@Override
+	public int indexOf(IAtom atom) {
+		return this.container.indexOf(atom);
+	}
+
+	@Override
+	public int indexOf(IBond bond) {
+		return this.container.indexOf(bond);
+	}
+
+	@Override
+	public int indexOf(ISingleElectron electron) {
+		return this.container.indexOf(electron);
+	}
+
+	@Override
+	public int indexOf(ILonePair pair) {
+		return this.container.indexOf(pair);
+	}
+
+	@Override
+	public IElectronContainer getElectronContainer(int number) {
+		return this.container.getElectronContainer(number);
+	}
+
+	@Override
+	public IBond getBond(IAtom atom1, IAtom atom2) {
+		return this.container.getBond(atom1, atom2);
+	}
+
+	@Override
+	public int getAtomCount() {
+		return this.container.getAtomCount();
+	}
+
+	@Override
+	public int getBondCount() {
+		return this.container.getBondCount();
+	}
+
+	@Override
+	public int getLonePairCount() {
+		return this.container.getLonePairCount();
+	}
+
+	@Override
+	public int getSingleElectronCount() {
+		return this.container.getSingleElectronCount();
+	}
+
+	@Override
+	public int getElectronContainerCount() {
+		return this.container.getElectronContainerCount();
+	}
+
+	@Override
+	public List<IAtom> getConnectedAtomsList(IAtom atom) {
+		return this.container.getConnectedAtomsList(atom);
+	}
+
+	@Override
+	public List<IBond> getConnectedBondsList(IAtom atom) {
+		return this.container.getConnectedBondsList(atom);
+	}
+
+	@Override
+	public List<ILonePair> getConnectedLonePairsList(IAtom atom) {
+		return this.container.getConnectedLonePairsList(atom);
+	}
+
+	@Override
+	public List<ISingleElectron> getConnectedSingleElectronsList(IAtom atom) {
+		return this.container.getConnectedSingleElectronsList(atom);
+	}
+
+	@Override
+	public List<IElectronContainer> getConnectedElectronContainersList(IAtom atom) {
+		return this.container.getConnectedElectronContainersList(atom);
+	}
+
+	@Override
+	public int getConnectedAtomsCount(IAtom atom) {
+		return this.container.getConnectedAtomsCount(atom);
+	}
+
+	@Override
+	public int getConnectedBondsCount(IAtom atom) {
+		return this.container.getConnectedBondsCount(atom);
+	}
+
+	@Override
+	public int getConnectedBondsCount(int idx) {
+		return this.container.getConnectedBondsCount(idx);
+	}
+
+	@Override
+	public int getConnectedLonePairsCount(IAtom atom) {
+		return this.container.getConnectedLonePairsCount(atom);
+	}
+
+	@Override
+	public int getConnectedSingleElectronsCount(IAtom atom) {
+		return this.container.getConnectedSingleElectronsCount(atom);
+	}
+
+	@Override
+	public double getBondOrderSum(IAtom atom) {
+		return this.container.getBondOrderSum(atom);
+	}
+
+	@Override
+	public Order getMaximumBondOrder(IAtom atom) {
+		return this.container.getMaximumBondOrder(atom);
+	}
+
+	@Override
+	public Order getMinimumBondOrder(IAtom atom) {
+		return this.container.getMinimumBondOrder(atom);
+	}
+
+	@Override
+	public void add(IAtomContainer atomContainer) {
+		this.container.add(atomContainer);
+	}
+
+	@Override
+	public void addAtom(IAtom atom) {
+		this.container.addAtom(atom);
+	}
+
+	@Override
+	public void addBond(IBond bond) {
+		this.container.addBond(bond);
+	}
+
+	@Override
+	public void addLonePair(ILonePair lonePair) {
+		this.container.addLonePair(lonePair);
+	}
+
+	@Override
+	public void addSingleElectron(ISingleElectron singleElectron) {
+		this.container.addSingleElectron(singleElectron);
+	}
+
+	@Override
+	public void addElectronContainer(IElectronContainer electronContainer) {
+		this.container.addElectronContainer(electronContainer);
+	}
+
+	@Override
+	public void remove(IAtomContainer atomContainer) {
+		this.container.remove(atomContainer);
+	}
+
+	@Override
+	public void removeAtomOnly(int position) {
+		this.container.removeAtomOnly(position);
+	}
+
+	@Override
+	public void removeAtomOnly(IAtom atom) {
+		this.container.removeAtomOnly(atom);
+	}
+
+	@Override
+	public IBond removeBond(int position) {
+		return this.container.removeBond(position);
+	}
+
+	@Override
+	public IBond removeBond(IAtom atom1, IAtom atom2) {
+		return this.container.removeBond(atom1, atom2);
+	}
+
+	@Override
+	public void removeBond(IBond bond) {
+		this.container.removeBond(bond);
+	}
+
+	@Override
+	public ILonePair removeLonePair(int position) {
+		return this.container.removeLonePair(position);
+	}
+
+	@Override
+	public void removeLonePair(ILonePair lonePair) {
+		this.container.removeLonePair(lonePair);
+	}
+
+	@Override
+	public ISingleElectron removeSingleElectron(int position) {
+		return this.container.removeSingleElectron(position);
+	}
+
+	@Override
+	public void removeSingleElectron(ISingleElectron singleElectron) {
+		this.container.removeSingleElectron(singleElectron);
+	}
+
+	@Override
+	public IElectronContainer removeElectronContainer(int position) {
+		return this.container.removeElectronContainer(position);
+	}
+
+	@Override
+	public void removeElectronContainer(IElectronContainer electronContainer) {
+		this.container.removeElectronContainer(electronContainer);
+	}
+
+	@Override
+	public void removeAtom(IAtom atom) {
+		this.container.removeAtom(atom);
+	}
+
+	@Override
+	public void removeAtom(int pos) {
+		this.container.removeAtom(pos);
+	}
+
+	@Override
+	public void removeAtomAndConnectedElectronContainers(IAtom atom) {
+		this.container.removeAtomAndConnectedElectronContainers(atom);
+	}
+
+	@Override
+	public void removeAllElements() {
+		this.container.removeAllElements();
+	}
+
+	@Override
+	public void removeAllElectronContainers() {
+		this.container.removeAllElectronContainers();
+	}
+
+	@Override
+	public void removeAllBonds() {
+		this.container.removeAllBonds();
+	}
+
+	@Override
+	public void addBond(int atom1, int atom2, Order order, Stereo stereo) {
+		this.container.addBond(atom1, atom2, order, stereo);
+	}
+
+	@Override
+	public void addBond(int atom1, int atom2, Order order) {
+		this.container.addBond(atom1, atom2, order);
+	}
+
+	@Override
+	public void addLonePair(int atomID) {
+		this.container.addLonePair(atomID);
+	}
+
+	@Override
+	public void addSingleElectron(int atomID) {
+		this.container.addSingleElectron(atomID);
+	}
+
+	@Override
+	public boolean contains(IAtom atom) {
+		return this.container.contains(atom);
+	}
+
+	@Override
+	public boolean contains(IBond bond) {
+		return this.container.contains(bond);
+	}
+
+	@Override
+	public boolean contains(ILonePair lonePair) {
+		return this.container.contains(lonePair);
+	}
+
+	@Override
+	public boolean contains(ISingleElectron singleElectron) {
+		return this.container.contains(singleElectron);
+	}
+
+	@Override
+	public boolean contains(IElectronContainer electronContainer) {
+		return this.container.contains(electronContainer);
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return this.container.isEmpty();
+	}
+
+	@Override
+	public String getTitle() {
+		return this.container.getTitle();
+	}
+
+	@Override
+	public void setTitle(String title) {
+		this.container.setTitle(title);
+	}
+
 }
-
-
-
-
-
