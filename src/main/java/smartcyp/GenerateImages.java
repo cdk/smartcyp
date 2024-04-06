@@ -43,7 +43,6 @@ import org.openscience.cdk.geometry.Projector;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
-import org.openscience.cdk.AtomContainer;
 
 import org.openscience.cdk.renderer.AtomContainerRenderer;
 import org.openscience.cdk.renderer.font.AWTFontManager;
@@ -163,7 +162,7 @@ public class GenerateImages {
 	public IAtomContainer generate2Dcoordinates(IAtomContainer iAtomContainer){ 
 
 
-		IAtomContainer molecule = new AtomContainer(iAtomContainer);
+		IAtomContainer molecule = iAtomContainer.getBuilder().newInstance(IAtomContainer.class, iAtomContainer);
 
 
 		//		boolean isConnected = ConnectivityChecker.isConnected(iAtomContainer);
@@ -181,7 +180,7 @@ public class GenerateImages {
 		{
 
 			// Generate 2D structure diagram (for each connected component).
-			final IAtomContainer iAtomContainer2d = new AtomContainer();	
+			final IAtomContainer iAtomContainer2d = iAtomContainer.getBuilder().newAtomContainer();
 
 			/*
 			final IMoleculeSet som = ConnectivityChecker.partitionIntoMolecules(iAtomContainer);

@@ -35,9 +35,8 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Properties;
 
-import org.openscience.cdk.Atom;
-import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.CDKConstants;
+import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.io.SMILESWriter;
 import org.openscience.cdk.io.listener.PropertiesListener;
@@ -89,7 +88,7 @@ public class WriteFilterValuesAsCSV {
 		}
 
 		outfile.println("Molecule,SMILES,Name,FilterValue");
-		Atom currentAtom;
+		IAtom currentAtom;
 		String currentAtomType;					// Atom symbol i.e. C, H, N, P or S
 
 

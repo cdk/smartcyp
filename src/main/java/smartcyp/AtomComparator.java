@@ -1,5 +1,5 @@
-/* 
- * Copyright (C) 2010-2011  David Gloriam <davidgloriam@googlemail.com> & Patrik Rydberg <patrik.rydberg@gmail.com>
+/* Copyright (C) 2010-2011  David Gloriam <davidgloriam@googlemail.com> & Patrik Rydberg <patrik.rydberg@gmail.com>
+ *                    2024  Egon Willighagen <egon.willighagen@gmail.com>
  * 
  * Contact: smartcyp@farma.ku.dk
  * 
@@ -27,13 +27,13 @@ package smartcyp;
 
 import java.util.Comparator;
 
-import org.openscience.cdk.Atom;
+import org.openscience.cdk.interfaces.IAtom;
 
 import smartcyp.MoleculeKU.SMARTCYP_PROPERTY;
 
 
 
-public class AtomComparator implements Comparator<Atom> {
+public class AtomComparator implements Comparator<IAtom> {
 
 	private final int before = -1;
 	private final int equal = 0;		// Only used for symmetric atoms, not atoms with same Score
@@ -48,7 +48,7 @@ public class AtomComparator implements Comparator<Atom> {
 
 	// Atoms sorted by Energy and A
 	// My implementation of compare, compares E and A
-	public int compare(Atom currentAtom, Atom comparisonAtom) {
+	public int compare(IAtom currentAtom, IAtom comparisonAtom) {
 
 		return this.compareScore(currentAtom, comparisonAtom);
 
@@ -56,7 +56,7 @@ public class AtomComparator implements Comparator<Atom> {
 
 
 
-	private int compareScore(Atom currentAtom, Atom comparisonAtom){
+	private int compareScore(IAtom currentAtom, IAtom comparisonAtom){
 		
 		// Set Score values
 		if(SMARTCYP_PROPERTY.Score.get(currentAtom) != null)  currentAtomScore = SMARTCYP_PROPERTY.Score.get(currentAtom).doubleValue();
@@ -83,7 +83,7 @@ public class AtomComparator implements Comparator<Atom> {
 
 
 
-	private int compareAccessibility(Atom currentAtom, Atom comparisonAtom){
+	private int compareAccessibility(IAtom currentAtom, IAtom comparisonAtom){
 
 		// Compare 2 numeric Accessibility values
 		currentAtomAccessibility = SMARTCYP_PROPERTY.Accessibility.get(currentAtom).doubleValue();
@@ -97,7 +97,7 @@ public class AtomComparator implements Comparator<Atom> {
 
 	}
 
-	private int checksymmetry(Atom currentAtom, Atom comparisonAtom){
+	private int checksymmetry(IAtom currentAtom, IAtom comparisonAtom){
 
 		// Symmetric
 		if(SMARTCYP_PROPERTY.SymmetryNumber.get(currentAtom).intValue() == SMARTCYP_PROPERTY.SymmetryNumber.get(comparisonAtom).intValue()) return equal;

@@ -38,9 +38,8 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
 
-import org.openscience.cdk.Atom;
-import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.CDKConstants;
+import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 
 import smartcyp.MoleculeKU.SMARTCYP_PROPERTY;
@@ -51,7 +50,7 @@ public class WriteResultsAsHTML {
 
 
 	PrintWriter outfile;
-	TreeSet<Atom> sortedAtomsTreeSet;
+	TreeSet<IAtom> sortedAtomsTreeSet;
 	String moleculeID;
 	private String dateAndTime;
 	String[] namesOfInfiles;
@@ -290,9 +289,9 @@ public class WriteResultsAsHTML {
 		outfile.println("<tr><th>Rank</th><th>Atom</th><th>Score</th><th>Energy</th><th>S2End</th><th>N+Dist</th><th>2DSASA</th></tr>");
 
 		// Iterate over the Atoms in this sortedAtomsTreeSet
-		sortedAtomsTreeSet = (TreeSet<Atom>) moleculeKU.getAtomsSortedByEnA2D6();
-		Iterator<Atom> sortedAtomsTreeSetIterator2D6 = sortedAtomsTreeSet.iterator();
-		Atom currentAtom2D6;
+		sortedAtomsTreeSet = (TreeSet<IAtom>) moleculeKU.getAtomsSortedByEnA2D6();
+		Iterator<IAtom> sortedAtomsTreeSetIterator2D6 = sortedAtomsTreeSet.iterator();
+		IAtom currentAtom2D6;
 		
 		while(sortedAtomsTreeSetIterator2D6.hasNext()){
 			currentAtom2D6 = sortedAtomsTreeSetIterator2D6.next();
@@ -335,9 +334,9 @@ public class WriteResultsAsHTML {
 		outfile.println("<tr><th>Rank</th><th>Atom</th><th>Score</th><th>Energy</th><th>S2End</th><th>COODist</th><th>2DSASA</th></tr>");
 
 		// Iterate over the Atoms in this sortedAtomsTreeSet
-		sortedAtomsTreeSet = (TreeSet<Atom>) moleculeKU.getAtomsSortedByEnA2C9();
-		Iterator<Atom> sortedAtomsTreeSetIterator2C9 = sortedAtomsTreeSet.iterator();
-		Atom currentAtom2C9;
+		sortedAtomsTreeSet = (TreeSet<IAtom>) moleculeKU.getAtomsSortedByEnA2C9();
+		Iterator<IAtom> sortedAtomsTreeSetIterator2C9 = sortedAtomsTreeSet.iterator();
+		IAtom currentAtom2C9;
 		
 		while(sortedAtomsTreeSetIterator2C9.hasNext()){
 			currentAtom2C9 = sortedAtomsTreeSetIterator2C9.next();
@@ -380,9 +379,9 @@ public class WriteResultsAsHTML {
 		outfile.println("<tr><th>Rank</th><th>Atom</th><th>Score</th><th>Energy</th><th>Accessibility</th><th>2DSASA</th></tr>");
 
 		// Iterate over the Atoms in this sortedAtomsTreeSet
-		sortedAtomsTreeSet = (TreeSet<Atom>) moleculeKU.getAtomsSortedByEnA();
-		Iterator<Atom> sortedAtomsTreeSetIterator = sortedAtomsTreeSet.iterator();
-		Atom currentAtom;
+		sortedAtomsTreeSet = (TreeSet<IAtom>) moleculeKU.getAtomsSortedByEnA();
+		Iterator<IAtom> sortedAtomsTreeSetIterator = sortedAtomsTreeSet.iterator();
+		IAtom currentAtom;
 		
 		while(sortedAtomsTreeSetIterator.hasNext()){
 			currentAtom = sortedAtomsTreeSetIterator.next();
@@ -407,7 +406,7 @@ public class WriteResultsAsHTML {
 		outfile.println("<img src=\"" + image2 + "\" class=\"hiddenPic\"  />");
 	}
 
-	public void writeAtomRowinMoleculeKUTable(Atom atom){
+	public void writeAtomRowinMoleculeKUTable(IAtom atom){
 
 		if(SMARTCYP_PROPERTY.Ranking.get(atom).intValue() == 1) outfile.println("<tr class=\"highlight1\">");
 		else if(SMARTCYP_PROPERTY.Ranking.get(atom).intValue() == 2) outfile.println("<tr class=\"highlight2\">");
@@ -425,7 +424,7 @@ public class WriteResultsAsHTML {
 		outfile.println("</tr>");
 	}
 
-	public void writeAtomRowinMoleculeKUTable2D6(Atom atom){
+	public void writeAtomRowinMoleculeKUTable2D6(IAtom atom){
 
 		if(SMARTCYP_PROPERTY.Ranking2D6.get(atom).intValue() == 1) outfile.println("<tr class=\"highlight1\">");
 		else if(SMARTCYP_PROPERTY.Ranking2D6.get(atom).intValue() == 2) outfile.println("<tr class=\"highlight2\">");
@@ -445,7 +444,7 @@ public class WriteResultsAsHTML {
 		outfile.println("</tr>");
 	}
 
-	public void writeAtomRowinMoleculeKUTable2C9(Atom atom){
+	public void writeAtomRowinMoleculeKUTable2C9(IAtom atom){
 
 		if(SMARTCYP_PROPERTY.Ranking2C9.get(atom).intValue() == 1) outfile.println("<tr class=\"highlight1\">");
 		else if(SMARTCYP_PROPERTY.Ranking2C9.get(atom).intValue() == 2) outfile.println("<tr class=\"highlight2\">");
